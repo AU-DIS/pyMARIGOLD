@@ -1,2 +1,2 @@
 # pyMARIGOLD
-A python package for MARIGOLD kmeans clustering 
+A python package for MARIGOLD kmeans clustering
