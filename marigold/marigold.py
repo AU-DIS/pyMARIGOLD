@@ -84,6 +84,7 @@ class MARIGOLD:
         init: Init_t = "random",
     ) -> None:
         self.dataset = X
+        #TODO: Check dtype is double
         self.n = X.shape[0]
         self.d = X.shape[1]
         self.n_clusters = n_clusters
