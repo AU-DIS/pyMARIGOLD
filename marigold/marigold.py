@@ -152,7 +152,7 @@ class MARIGOLD:
     def fit(self) -> MARIGOLD:
         libname = pathlib.Path(__file__).parent.absolute() / "src"
         c_lib = None
-        print(libname)
+        
         # TODO: This should not be in fit but solved at init.
         if platform.system() == "Linux":
             for f_name in os.listdir(libname):
@@ -175,14 +175,13 @@ class MARIGOLD:
 
         res: list[int]
         for _ in range(self.n_init):
+        
             self._init_centroids(self.init)
             out_centroids = (ctypes.c_double * (self.n_clusters * self.d))()
-
-            # ndpointer(ctypes.c_double, flags="C_CONTIGUOUS")()
-            # self.final_centroids = np.zeros((self.k,self.d),dtype=np.double)
             final_iter = ctypes.c_int(0)
             final_inertia = ctypes.c_double(0)
             run.restype = ctypes.POINTER(ctypes.c_int)
+            
             run.argtypes = [
                 ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
                 ctypes.c_int,
@@ -206,7 +205,6 @@ class MARIGOLD:
 
             l_: list[int] = [res[i] for i in range(self.n)]
 
-            # centroids_ptr = centroids_ptr.value
             c_: list[list[float]] = [
                 [out_centroids[i * self.d + j] for j in range(self.d)]
                 for i in range(self.n_clusters)
