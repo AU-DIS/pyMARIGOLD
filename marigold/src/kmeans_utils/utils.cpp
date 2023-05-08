@@ -107,7 +107,7 @@ bool Recalculate(const double data[], double centroids[], double old_centroids[]
     memset(centroids, 0.0, sizeof(double)*k*d);
 
     memset(cluster_count, 0, sizeof(double)*k);
-    
+
     //Reset intertia
     *inertia = 0;
 
@@ -122,7 +122,7 @@ bool Recalculate(const double data[], double centroids[], double old_centroids[]
         }
     }
 
-    
+
     //Calculate new centroid positions
     for (int i = 0; i < k; i++) {
         if (cluster_count[i] > 0) {

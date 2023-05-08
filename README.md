@@ -13,7 +13,7 @@ pip install git+https://github.com/AU-DIS/pyMARIGOLD
 This example shows how to load and run marigold:
 
 ```python
-import marigold as mg 
+import marigold as mg
 import numpy as np
 
 dataset = np.ones((5, 10), dtype=np.double)
