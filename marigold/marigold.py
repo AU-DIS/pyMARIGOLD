@@ -171,11 +171,6 @@ class MARIGOLD:
 
         run = getattr(c_lib, "run")
 
-        # print(out_centroids[0], out_centroids[1], out_centroids[2])
-
-        # print(f"Val: {final_iter.value}")
-        # cast = ctypes.cast(centroids_ptr, ctypes.POINTER(ctypes.c_double))
-
         self.final_inertia = float("inf")
 
         res: list[int]
@@ -209,8 +204,6 @@ class MARIGOLD:
                 ctypes.byref(final_inertia),
             )
 
-            # print(self.final_centroids)
-            # print(f"Val: {final_iter.value}")
             l_: list[int] = [res[i] for i in range(self.n)]
 
             # centroids_ptr = centroids_ptr.value
@@ -218,8 +211,7 @@ class MARIGOLD:
                 [out_centroids[i * self.d + j] for j in range(self.d)]
                 for i in range(self.n_clusters)
             ]
-            # print(c_)
-            # print(f"Val: {final_iter.value}")
+            
             getattr(c_lib, "clear")
 
             # If inertia is better the save results.
@@ -227,8 +219,6 @@ class MARIGOLD:
                 self.final_iter = final_iter.value
                 self.final_inertia = final_inertia.value
                 self.final_centroids = np.array(c_)
-                # print(self.final_centroids)
-                # print(f"Val: {final_iter.value}")
                 self.labels_ = np.array(l_)
 
         return self
