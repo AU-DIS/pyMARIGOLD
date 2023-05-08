@@ -25,9 +25,10 @@ def marigold(
     X: npt.NDArray[np.double],
     n_clusters: int = 8,
     init: Init_t = "random",
-) -> tuple[npt.NDArray[np.double], npt.NDArray[np.int64], None, int]:
-    est = MARIGOLD(X=X, n_clusters=n_clusters, init=init).fit()
-    return est.final_centroids, est.labels_, None, est.final_iter
+    n_init: Union[int, Literal["auto"]]= "auto",
+) -> tuple[npt.NDArray[np.double], npt.NDArray[np.int64], float, int]:
+    est = MARIGOLD(X=X, n_clusters=n_clusters, init=init, n_init=n_init).fit()
+    return est.final_centroids, est.labels_, est.final_inertia, est.final_iter
 
 
 class MARIGOLD:
@@ -82,14 +83,27 @@ class MARIGOLD:
         X: npt.NDArray[np.double],
         n_clusters: int = 8,
         init: Init_t = "random",
+        n_init: Union[int, Literal["auto"]] = "auto",
     ) -> None:
         self.dataset = X
         #TODO: Check dtype is double
+        self.init: Init_t = init 
         self.n = X.shape[0]
         self.d = X.shape[1]
         self.n_clusters = n_clusters
         self.random_state = RandomState()
-        self._init_centroids(init)
+        #self._init_centroids(init)
+        self.n_init: int = self._solve_n_init(n_init)
+        
+
+    def _solve_n_init(self, n_init: Union[int, Literal["auto"]]) -> int:
+        #This may be extended in the future to allow more case specific standard initializations
+        if n_init == "auto":
+            return 1
+        #overwrite init to random
+        self.init = "random" 
+        return n_init
+    
 
     def _init_centroids(self, init: Init_t) -> None:
         if isinstance(init, str) and init == "k-means++":
@@ -119,9 +133,9 @@ class MARIGOLD:
             self.centroids = init
         elif isinstance(init, str) and init == "random":
             chosen = self.random_state.permutation(self.n)[: self.n_clusters]
-            self.centroids = self.dataset[chosen]
+            self.centroids = np.copy(self.dataset[chosen])
         elif isinstance(init, str) and init == "first":
-            self.centroids = self.dataset[: self.n_clusters]
+            self.centroids = np.copy(self.dataset[: self.n_clusters])
 
     def fit(self) -> MARIGOLD:
         libname = pathlib.Path(__file__).parent.absolute() / "src"
@@ -144,59 +158,76 @@ class MARIGOLD:
             raise FileNotFoundError(c_lib)
 
         run = getattr(c_lib, "run")
-        out_centroids = (
-            ctypes.c_double * (self.n_clusters * self.d)
-        )()  # ndpointer(ctypes.c_double, flags="C_CONTIGUOUS")()
-        # self.final_centroids = np.zeros((self.k,self.d),dtype=np.double)
-        final_iter = ctypes.c_int(0)
-        run.restype = ctypes.POINTER(ctypes.c_int)
-        run.argtypes = [
-            ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
-            ctypes.c_int,
-            ctypes.c_int,
-            ctypes.c_int,
-            ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
-            ctypes.POINTER(ctypes.c_double),
-            ctypes.POINTER(ctypes.c_int),
-        ]
+        
         # print(out_centroids[0], out_centroids[1], out_centroids[2])
 
         # print(f"Val: {final_iter.value}")
         # cast = ctypes.cast(centroids_ptr, ctypes.POINTER(ctypes.c_double))
-        res = run(
-            self.dataset,
-            self.n,
-            self.d,
-            self.n_clusters,
-            self.centroids,
-            ctypes.cast(out_centroids, ctypes.POINTER(ctypes.c_double)),
-            ctypes.byref(final_iter),
-        )
 
-        # print(self.final_centroids)
-        # print(f"Val: {final_iter.value}")
-        l_: list[int] = [res[i] for i in range(self.n)]
+        self.final_inertia = float('inf')
 
-        # centroids_ptr = centroids_ptr.value
-        c_: list[list[float]] = [
-            [out_centroids[i * self.d + j] for j in range(self.d)]
-            for i in range(self.n_clusters)
-        ]
-        # print(c_)
-        # print(f"Val: {final_iter.value}")
-        getattr(c_lib, "clear")
+        res: list[int]
+        for _ in range(self.n_init):
+            self._init_centroids(self.init)
+            out_centroids = (
+            ctypes.c_double * (self.n_clusters * self.d)
+            )() 
+            
+            # ndpointer(ctypes.c_double, flags="C_CONTIGUOUS")()
+            # self.final_centroids = np.zeros((self.k,self.d),dtype=np.double)
+            final_iter = ctypes.c_int(0)
+            final_inertia = ctypes.c_double(0)
+            run.restype = ctypes.POINTER(ctypes.c_int)
+            run.argtypes = [
+                ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+                ctypes.c_int,
+                ctypes.c_int,
+                ctypes.c_int,
+                ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+                ctypes.POINTER(ctypes.c_double),
+                ctypes.POINTER(ctypes.c_int),
+            ]
 
-        self.final_iter = final_iter.value
-        self.final_centroids = np.array(c_)
-        # print(self.final_centroids)
-        # print(f"Val: {final_iter.value}")
-        self.labels_ = np.array(l_)
+            
+            res = run(
+                self.dataset,
+                self.n,
+                self.d,
+                self.n_clusters,
+                self.centroids,
+                ctypes.cast(out_centroids, ctypes.POINTER(ctypes.c_double)),
+                ctypes.byref(final_iter),
+                ctypes.byref(final_inertia),
+            )
+
+            # print(self.final_centroids)
+            # print(f"Val: {final_iter.value}")
+            l_: list[int] = [res[i] for i in range(self.n)]
+
+            # centroids_ptr = centroids_ptr.value
+            c_: list[list[float]] = [
+                [out_centroids[i * self.d + j] for j in range(self.d)]
+                for i in range(self.n_clusters)
+            ]
+            # print(c_)
+            # print(f"Val: {final_iter.value}")
+            getattr(c_lib, "clear")
+
+            #If inertia is better the save results.
+            if final_inertia.value < self.final_inertia: 
+                self.final_iter = final_iter.value
+                self.final_inertia = final_inertia.value
+                self.final_centroids = np.array(c_)
+                # print(self.final_centroids)
+                # print(f"Val: {final_iter.value}")
+                self.labels_ = np.array(l_)
 
         return self
 
 
 if __name__ == "__main__":
-    dataset = np.ones((5, 10), dtype=np.double)
-    print(dataset)
-    result = marigold(dataset, 2, init="first")
+    #dataset = np.ones((5, 10), dtype=np.double)
+    dataset = np.random.rand(100,10)
+    #print(dataset)
+    result = marigold(dataset, 2, n_init=10)
     print(result)

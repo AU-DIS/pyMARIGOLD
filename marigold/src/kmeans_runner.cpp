@@ -36,17 +36,17 @@ class KmeansRunner {
         };
 
 
-        void run_kmeans(int n, int d, int k, double* init_centroids, double* final_centroids, int* final_iter) {
+        void run_kmeans(int n, int d, int k, double* init_centroids, double* final_centroids, int* final_iter, double* final_inertia) {
             // std::unique_ptr<Dataset>(new Dataset(n,d));
             kmeans_strategy_->init(1000,n, d, k, data.get(), init_centroids);
-            result_labels = kmeans_strategy_->run(data.get(), final_centroids, final_iter);
+            result_labels = kmeans_strategy_->run(data.get(), final_centroids, final_iter, final_inertia);
             kmeans_strategy_->clear();
         };
 
-        int* run_wo_clear_kmeans(int n, int d, int k, double* init_centroids, double* final_centroids, int* final_iter) {
+        int* run_wo_clear_kmeans(int n, int d, int k, double* init_centroids, double* final_centroids, int* final_iter, double* final_inertia) {
             // std::unique_ptr<Dataset>(new Dataset(n,d));
             kmeans_strategy_->init(1000,n, d, k, data.get(), init_centroids);
-            result_labels = kmeans_strategy_->run(data.get(), final_centroids, final_iter);
+            result_labels = kmeans_strategy_->run(data.get(), final_centroids, final_iter, final_inertia);
             return result_labels;
         };
 

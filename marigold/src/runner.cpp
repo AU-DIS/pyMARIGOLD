@@ -20,9 +20,9 @@ KmeansRunner runner(std::make_unique<MARIGOLDKmeansStrategy>());
     return runner.run_wo_clear_kmeans(n,d,k, init_centroids, final_centroids, final_iter);
 }*/
 
-extern "C" LIB_FUNC int* run(double* data_pnt, int n, int d, int k, double* init_centroids, double* final_centroids, int* final_iter) {
+extern "C" LIB_FUNC int* run(double* data_pnt, int n, int d, int k, double* init_centroids, double* final_centroids, int* final_iter, double* final_inertia) {
     runner.init_run(n,d,k,data_pnt);
-    return runner.run_wo_clear_kmeans(n,d,k, init_centroids, final_centroids, final_iter);
+    return runner.run_wo_clear_kmeans(n,d,k, init_centroids, final_centroids, final_iter, final_inertia);
 }
 
 extern "C" LIB_FUNC void clear() {

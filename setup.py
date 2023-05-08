@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name="pyMARIGOLD",
-    version="0.1.0",
+    version="0.1.1",
     author="Kasper Overgaard Mortensen",
     author_email="km@cs.au.dk",
     packages=["marigold"],

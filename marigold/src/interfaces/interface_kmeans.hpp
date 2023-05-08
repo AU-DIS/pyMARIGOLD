@@ -7,7 +7,7 @@ class KmeansStrategy {
     public:
       // pure virtual function
         virtual ~KmeansStrategy() = default;
-        virtual int* run(Dataset* dataset,  double* final_centroids, int* final_iter) = 0;
+        virtual int* run(Dataset* dataset,  double* final_centroids, int* final_iter, double* final_inertia) = 0;
         virtual void clear() = 0;
         virtual void init(int max_iter, int n, int d, int k, Dataset* dataset, double* inital_centroids) = 0;
 

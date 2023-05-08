@@ -99,7 +99,7 @@ void Update_bounds(double data[], double centroids[], double* c_to_c[], double* 
 };
 
 
-bool Recalculate(const double data[], double centroids[], double old_centroids[], double cluster_count[], int labels[], double div[], const int n, const int k, const int d, long long &feature_cnt) {
+bool Recalculate(const double data[], double centroids[], double old_centroids[], double cluster_count[], int labels[], double div[], const int n, const int k, const int d, long long &feature_cnt, double* inertia) {
     bool converged = true;
     //With the power of clever indexing we can use memcpy, to save old centroids. (If we are even smarter we swap the pointers and save a pass)
     memcpy(old_centroids, centroids, sizeof(double)*k*d);
@@ -107,15 +107,22 @@ bool Recalculate(const double data[], double centroids[], double old_centroids[]
     memset(centroids, 0.0, sizeof(double)*k*d);
 
     memset(cluster_count, 0, sizeof(double)*k);
+    
+    //Reset intertia
+    *inertia = 0;
 
     //Count size of clusters and add pos to centroid
     for (int i = 0; i < n; i++) {
         cluster_count[labels[i]]++;
         for (int j = 0; j < d; j++) {
             centroids[labels[i]*d+j] += data[i*d+j];
+            //Calculate inertia to old centers, as we only need it at convergence, where old = new.
+            //As a result is is wrong for every other round, but we skip a full data loop by calculating it here every round.
+            *inertia += (data[i*d+j]-old_centroids[labels[i]*d+j])*(data[i*d+j]-old_centroids[labels[i]*d+j]);
         }
     }
 
+    
     //Calculate new centroid positions
     for (int i = 0; i < k; i++) {
         if (cluster_count[i] > 0) {
@@ -129,7 +136,6 @@ bool Recalculate(const double data[], double centroids[], double old_centroids[]
             }
         }
     }
-
     //for (int i = 0; i < k; i++) {
     //    std::cout << cluster_count[i] << " ";
     //    }
