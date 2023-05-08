@@ -66,16 +66,12 @@ class MARIGOLD:
     provide the same flexibility as sklearn kmeans.
 
     Important missing features:
-    Multiple runs.
-    Run automatically with different initialization and return best.
-
     Max_iter.
     Max iter is currently unexposed and fixed to 1000 iterations.
 
     Verbose mode.
     It prints what it prints, and you can't stop it.
 
-    Return inertia.
     """
 
     def __init__(
