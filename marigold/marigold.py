@@ -50,13 +50,27 @@ class MARIGOLD:
         If they are set wrong, it will access unintended memory.
 
     n : int
-        The number of points in the dataset
+        The number of points in the dataset.
+        Set automatically using the marigold function.
+        
 
     d : int
-        The number of dimensions of each point in the dataset
+        The number of dimensions of each point in the dataset.
+        Set automatically using the marigold function.
 
     k : int
         The number of clusters to form
+    
+    init : numpy array, "random", "k-means++", "first"
+        The initial clusters. Can be set to a numpy array for custom initialization.
+        "random" - set clusters to random datapoints
+        "k-means" - not implemented. defaults to "random"
+        "first" - set clusters to the first k datapoints
+        
+    n_init : int, "auto"
+        Run clustering n_init times and return the results with lowest inertia.
+        "auto" - defaults to 1.
+        If n_init is not "auto", it will set init to "random" overwriting user defined values.
 
 
     Notes
@@ -71,6 +85,9 @@ class MARIGOLD:
 
     Verbose mode.
     It prints what it prints, and you can't stop it.
+    
+    Warnings.
+    Correctness of provided values for dataset and its size is currently not checked. Expect unspecified errors if manually set incorrectly .
 
     """
 
