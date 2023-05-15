@@ -36,3 +36,16 @@ Build for Windows 64bit
 ```shell
 x86_64-w64-mingw32-g++-win32 -fPIC -static -shared -mwindows -O3 -o marigold.dll runner.cpp -D BUILD_LIB
 ```
+
+
+
+
+## Rust Wrapper
+A rust implementation is included. It can be build using maturnin 
+How to install:
+
+```shell
+pip install maturin
+maturin develop
+```
+
