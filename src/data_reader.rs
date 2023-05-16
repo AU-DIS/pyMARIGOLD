@@ -1,40 +1,69 @@
 use std::collections::HashMap;
+use std::fmt::Debug;
+use num::Num;
 
-pub enum ReaderType {
-    CSVReader,
-    NumpyReader,
-}
-
-#[derive(Default)]
-pub struct DataReader {
-    //accepted_formats: HashMap<String, bool>,
-}
-impl DataReader {
-    /*fn add_format(&mut self, format: String) {
-        self.accepted_formats.insert(format, true);
-    }*/
+pub enum DataType<T: num::Num> {
+    CSVData(String),
+    NumpyData(Vec<T>),
 }
 
-pub trait CSVReader {
-    fn read();
-    //fn add_format(&self);
+pub struct CSVReader<T: num::Num + Debug>{
+    data: Option<Vec<T>>
 }
-impl CSVReader for DataReader {
-    fn read() {
-        todo!()
+
+impl<T: num::Num + Debug> CSVReader<T> {
+    pub fn new() -> Self{
+        Self {data: None}
     }
-    /*fn add_format(&mut self) {
-        self.accepted_formats.insert(String::from("csv"), true);
-    }*/
 
 }
-
-pub trait NumpyReader {
-    fn read();
-    //fn add_format(&self);
+pub struct NumpyReader<T: num::Num + Debug>{
+    data: Option<Vec<T>>
 }
-impl NumpyReader for DataReader {
-    fn read() {
-        todo!()
+impl<T: num::Num + Debug> NumpyReader<T> {
+    pub fn new() -> Self{
+        Self {data: None}
     }
 }
+
+
+pub trait DataReaderStrategy<T: num::Num + Debug> {
+    fn read(self: &Self, data: DataType<T>);
+    fn get_data_ref(self: &Self) -> &Option<Vec<T>>;
+}
+
+impl<T: num::Num + Debug> DataReaderStrategy<T> for CSVReader<T> {
+    fn read(self: &mut Self, data: DataType<T>) {
+        match data {
+            DataType::CSVData(path) => {
+                println!("Reading as CSV: {}", path);
+                self.data = Some(vec![1.0,1.0,1.0,1.0]);
+            },
+            _ => {
+                println!("CSVReader Got wrong type");
+                self.data = None;
+            },
+        }
+    }
+    fn get_data_ref(self: &Self) -> &Option<Vec<T>> {
+        &self.data
+    }
+}
+
+impl<T: num::Num + Debug> DataReaderStrategy<T> for NumpyReader<T> {
+    fn read(self: &mut Self, data: DataType<T>)  {
+        match data {
+            DataType::NumpyData(data_array) => {
+                println!("Reading as array {:?}",data_array);
+                self.data = Some(data_array);
+            },
+            _ => { println!("Wrong type");
+                self.data = None;
+            },
+        }
+    }
+    fn get_data_ref(self: &Self) -> &Option<Vec<T>> {
+        &self.data
+    }
+}
+

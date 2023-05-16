@@ -1,7 +1,10 @@
-pub struct LloydStrategy;
+use std::fmt::Debug;
 
-impl crate::kmeans::KmeansStrategy for LloydStrategy {
-    fn update(&self) {
+pub struct LloydStrategy;
+use crate::kmeans::{KmeansStrategy};
+
+impl<T: num::Num + Debug> KmeansStrategy<T> for LloydStrategy{
+    fn update(&self, data: &Vec<T>) {
         println!("Calling rust from python!")
     }
 }
