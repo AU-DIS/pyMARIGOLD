@@ -3,6 +3,7 @@ mod kmeans;
 mod marigold;
 mod lloyd;
 mod kmeans_utils;
+mod data_reader;
 
 use num::Num;
 py_module_initializer!(pyMARIGOLD, |py, m| {
@@ -23,7 +24,9 @@ fn run(py: Python, args: &PyTuple, kwargs: Option<&PyDict>) -> PyResult<PyNone> 
         }
     }
     //And now we actually do something with it
-    kmeans::KmeansRunner::new(crate::marigold::MARIGOLDStrategy).run();
+    let runner = kmeans::KmeansRunner::new(crate::marigold::MARIGOLDStrategy);
+
+        .run();
 
     //Aaaand back to python
     Ok(PyNone)
