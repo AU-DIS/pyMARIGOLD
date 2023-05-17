@@ -24,19 +24,23 @@ fn run(py: Python, args: &PyTuple, kwargs: Option<&PyDict>) -> PyResult<PyNone> 
         }
     }
     //And now we actually do something with it
-    let mut runner1 = kmeans::KmeansRunner::<f64>::new(crate::marigold::MARIGOLDStrategy, crate::data_reader::CSVReader);
+    let mut runner1 = kmeans::KmeansRunner::<f64>::new(crate::marigold::MARIGOLDStrategy, crate::data_reader::CSVReader::new());
     runner1.set_dataset(DataType::CSVData(String::from("/path/path")));
     runner1.set_dataset(DataType::NumpyData(vec![1.,2.,3.]));
-    runner1.set_datareader(crate::data_reader::NumpyReader);
+    runner1.set_datareader(crate::data_reader::NumpyReader::new());
     runner1.set_dataset(DataType::NumpyData(vec![1.,2.,3.]));
     runner1.set_dataset(DataType::CSVData(String::from("/path/path")));
+    runner1.set_dataset(DataType::NumpyData(vec![1.,2.,3.]));
+    println!("{}", runner1.run());
         //.run();
-    let mut runner2 = kmeans::KmeansRunner::<f32>::new(crate::marigold::MARIGOLDStrategy, crate::data_reader::CSVReader);
+    let mut runner2 = kmeans::KmeansRunner::<f32>::new(crate::marigold::MARIGOLDStrategy, crate::data_reader::CSVReader::new());
     runner2.set_dataset(DataType::CSVData(String::from("/path/path")));
     runner2.set_dataset(DataType::NumpyData(vec![1.,2.,3.]));
-    runner2.set_datareader(crate::data_reader::NumpyReader);
+    runner2.set_datareader(crate::data_reader::NumpyReader::new());
     runner2.set_dataset(DataType::NumpyData(vec![1.,2.,3.]));
     runner2.set_dataset(DataType::CSVData(String::from("/path/path")));
+    runner2.set_dataset(DataType::NumpyData(vec![1.,2.,3.]));
+    println!("{}", runner2.run());
 
     //Aaaand back to python
     Ok(PyNone)
