@@ -8,33 +8,33 @@ pub enum DataType<T> {
     NumpyData(Vec<T>),
 }
 
-pub struct CSVReader<T: num::Num + Debug>{
+pub struct CSVReader<T>{
     data: Option<Vec<T>>
 }
 
-impl<'a, T: num::Num + Debug> CSVReader<T> {
+impl<T> CSVReader<T> {
     pub fn new() -> Self{
         Self {data: None}
     }
 
 }
-pub struct NumpyReader<T: num::Num + Debug>{
+pub struct NumpyReader<T>{
     data: Option<Vec<T>>
 }
-impl<T: num::Num + Debug> NumpyReader<T> {
+impl<T> NumpyReader<T> {
     pub fn new() -> Self{
         Self {data: None}
     }
 }
 
 
-pub trait DataReaderStrategy<T: num::Num + Debug> {
-    fn read(self: &mut Self, data: DataType<T>);
+pub trait DataReaderStrategy<T> {
+    fn read(self: &mut Self, data: DataType<T>) where T: NumCast + Debug;
     fn get_data_ref(self: &Self) -> &Option<Vec<T>>;
 }
 
-impl<T: num::Num + NumCast + Debug> DataReaderStrategy<T> for CSVReader<T> where {
-    fn read(self: &mut Self, data: DataType<T>) {
+impl<T> DataReaderStrategy<T> for CSVReader<T> {
+    fn read(self: &mut Self, data: DataType<T>) where T: NumCast{
         match data {
             DataType::CSVData(path) => {
                 println!("Reading as CSV: {}", path);
@@ -55,8 +55,8 @@ impl<T: num::Num + NumCast + Debug> DataReaderStrategy<T> for CSVReader<T> where
     }
 }
 
-impl<T: num::Num + Debug> DataReaderStrategy<T> for NumpyReader<T> {
-    fn read(self: &mut Self, data: DataType<T>)  {
+impl<T> DataReaderStrategy<T> for NumpyReader<T> {
+    fn read(self: &mut Self, data: DataType<T>) where T: Debug {
         match data {
             DataType::NumpyData(data_array) => {
                 println!("Reading as array {:?}",data_array);
