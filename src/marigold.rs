@@ -14,5 +14,6 @@ impl<T: TSize> KmeansStrategy<T> for  MARIGOLDStrategy  {
         //let v = euclidian_distance(data, data);
 
         println!("Here is a value from far away {:?}", p);
+
     }
 }

@@ -13,4 +13,5 @@ csv = "1.2.1"
 num = "0.4.0"
 cpython = "0.7.1"
 rayon = "1.7.0"
+log = "0.4.18"
 #simd_euclidean = {git = "https://github.com/lazear/simd-euclidean.git" }

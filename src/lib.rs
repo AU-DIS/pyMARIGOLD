@@ -3,13 +3,14 @@ use std::iter::Sum;
 use cpython::{py_module_initializer, py_fn, PyNone, PyResult, Python, PyDict, PyTuple};
 use num::{Float, NumCast};
 
+use log::warn;
 mod kmeans;
 mod marigold;
 mod lloyd;
 mod kmeans_utils;
 mod data_reader;
 
-use crate::data_reader::DataType;
+use crate::data_reader::{CSVReader, DataReaderStrategy, DataType, NumpyReader};
 py_module_initializer!(pyMARIGOLD, |py, m| {
     m.add(py, "__doc__", "Module documentation string")?;
     m.add(py, "run", py_fn!(py, run(*args, **kwargs)))?;
@@ -34,23 +35,39 @@ fn run(py: Python, args: &PyTuple, kwargs: Option<&PyDict>) -> PyResult<PyNone> 
         }
     }
     //And now we actually do something with it
-    let mut runner1 = kmeans::KmeansRunner::<f64>::new(crate::marigold::MARIGOLDStrategy, crate::data_reader::CSVReader::new());
-    runner1.set_dataset(DataType::CSVData(String::from("/path/path")));
-    runner1.set_dataset(DataType::NumpyData(vec![1.,2.,3.]));
-    runner1.set_datareader(crate::data_reader::NumpyReader::new());
-    runner1.set_dataset(DataType::NumpyData(vec![1.,2.,3.]));
-    runner1.set_dataset(DataType::CSVData(String::from("/path/path")));
-    runner1.set_dataset(DataType::NumpyData(vec![1.,2.,3.]));
-    println!("{}", runner1.run());
+    //let runner1 = kmeans::KmeansRunner::run(); // ::new(crate::marigold::MARIGOLDStrategy, crate::data_reader::CSVReader::new());
+    let mut reader1 = NumpyReader::<f64>::new();
+    reader1.read(DataType::NumpyData(vec![1.,2.,3.])).unwrap();
+    let kmeans1 = marigold::MARIGOLDStrategy;
+    let mut run_result = kmeans::KmeansRunner::run(&kmeans1, &reader1)
+        .expect("Could not run Kmeans");
+    println!("{}", run_result);
+
+
+    let mut reader2 = NumpyReader::<f32>::new();
+    //reader2.read(DataType::CSVData(String::from("/path"))).expect("DataReader failed to read data");
+    reader2.read(DataType::NumpyData(vec![1., 2., 3.])).expect("DataReader failed to read data");
+    run_result = kmeans::KmeansRunner::run(&kmeans1, &reader2)
+        .expect("Could not run Kmeans");
+    println!("{}", run_result);
+
+
+    //runner1.set_dataset(DataType::CSVData(String::from("/path/path")));
+    //runner1.set_dataset(DataType::NumpyData(vec![1.,2.,3.]));
+    //runner1.set_datareader(crate::data_reader::NumpyReader::new());
+    //runner1.set_dataset(DataType::NumpyData(vec![1.,2.,3.]));
+    //runner1.set_dataset(DataType::CSVData(String::from("/path/path")));
+    //runner1.set_dataset(DataType::NumpyData(vec![1.,2.,3.]));
+
         //.run();
-    let mut runner2 = kmeans::KmeansRunner::<f32>::new(crate::marigold::MARIGOLDStrategy, crate::data_reader::CSVReader::new());
+    /*let mut runner2 = kmeans::KmeansRunner::<f32>::new(crate::marigold::MARIGOLDStrategy, crate::data_reader::CSVReader::new());
     runner2.set_dataset(DataType::CSVData(String::from("/path/path")));
     runner2.set_dataset(DataType::NumpyData(vec![1.,2.,3.]));
     runner2.set_datareader(crate::data_reader::NumpyReader::new());
     runner2.set_dataset(DataType::NumpyData(vec![1.,2.,3.]));
     runner2.set_dataset(DataType::CSVData(String::from("/path/path")));
-    runner2.set_dataset(DataType::NumpyData(vec![1.,2.,3.]));
-    println!("{}", runner2.run());
+    runner2.set_dataset(DataType::NumpyData(vec![1.,2.,3.]));*/
+    //println!("{}", runner2.run());
 
     //Aaaand back to python
     Ok(PyNone)
