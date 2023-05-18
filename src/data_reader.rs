@@ -1,6 +1,5 @@
-use std::collections::HashMap;
 use std::fmt::Debug;
-use num::{Num, NumCast};
+use num::NumCast;
 
 
 pub enum DataType<T> {
@@ -29,12 +28,12 @@ impl<T> NumpyReader<T> {
 
 
 pub trait DataReaderStrategy<T> {
-    fn read(self: &mut Self, data: DataType<T>) where T: NumCast + Debug;
-    fn get_data_ref(self: &Self) -> &Option<Vec<T>>;
+    fn read(&mut self, data: DataType<T>) where T: NumCast + Debug;
+    fn get_data_ref(&self) -> &Option<Vec<T>>;
 }
 
 impl<T> DataReaderStrategy<T> for CSVReader<T> {
-    fn read(self: &mut Self, data: DataType<T>) where T: NumCast{
+    fn read(&mut self, data: DataType<T>) where T: NumCast{
         match data {
             DataType::CSVData(path) => {
                 println!("Reading as CSV: {}", path);
@@ -50,13 +49,13 @@ impl<T> DataReaderStrategy<T> for CSVReader<T> {
             },
         }
     }
-    fn get_data_ref(self: &Self) -> &Option<Vec<T>> {
+    fn get_data_ref(&self) -> &Option<Vec<T>> {
         &self.data
     }
 }
 
 impl<T> DataReaderStrategy<T> for NumpyReader<T> {
-    fn read(self: &mut Self, data: DataType<T>) where T: Debug {
+    fn read(&mut self, data: DataType<T>) where T: Debug {
         match data {
             DataType::NumpyData(data_array) => {
                 println!("Reading as array {:?}",data_array);
@@ -67,7 +66,7 @@ impl<T> DataReaderStrategy<T> for NumpyReader<T> {
             },
         }
     }
-    fn get_data_ref(self: &Self) -> &Option<Vec<T>> {
+    fn get_data_ref(&self) -> &Option<Vec<T>> {
         &self.data
     }
 }

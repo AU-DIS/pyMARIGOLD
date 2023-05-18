@@ -1,11 +1,15 @@
-use simd_euclidean::Vectorized;
+//use simd_euclidean::Vectorized;
+use rayon::prelude::*;
 
 // Generic Vectorized is implicit a reference. Not confusing at all.
 
-pub fn euclidian_distance<T: Vectorized>(a: T, b: T) -> <T as Vectorized>::Output {
-    return Vectorized::distance(a,b);
+use crate::TSize;
+
+pub fn euclidian_distance<T: TSize>(data1: &[T], data2: &[T]) -> T {
+    T::sqrt(squared_distance(data1,data2))
 }
 
-pub fn squared_distance<T: Vectorized>(a: T, b: T) -> <T as Vectorized>::Output {
-    return Vectorized::squared_distance(a, b);
+pub fn squared_distance<T: TSize>(data1: &[T], data2: &[T]) -> T {
+    data1.par_iter().zip(data2.par_iter()).map(|(&x, &y)| (x-y)*(x-y)).sum()
 }
+

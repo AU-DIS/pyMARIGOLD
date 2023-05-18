@@ -1,18 +1,28 @@
+use std::fmt::Debug;
+use std::iter::Sum;
 use cpython::{py_module_initializer, py_fn, PyNone, PyResult, Python, PyDict, PyTuple};
+use num::{Float, NumCast};
+
 mod kmeans;
 mod marigold;
 mod lloyd;
 mod kmeans_utils;
 mod data_reader;
 
-use num::Num;
 use crate::data_reader::DataType;
 py_module_initializer!(pyMARIGOLD, |py, m| {
     m.add(py, "__doc__", "Module documentation string")?;
     m.add(py, "run", py_fn!(py, run(*args, **kwargs)))?;
     Ok(())
 });
-type TSize = f64;
+//type TSize = f64;
+pub trait TSize: Float + Debug + Sum + NumCast + Sync + Send {}
+
+impl TSize for f64 {}
+impl TSize for f32 {}
+
+
+
 fn run(py: Python, args: &PyTuple, kwargs: Option<&PyDict>) -> PyResult<PyNone> {
     //We can parse arguments from python here
     for arg in args.iter(py) {
