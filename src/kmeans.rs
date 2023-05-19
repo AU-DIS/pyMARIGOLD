@@ -1,9 +1,8 @@
-use std::fmt;
-use std::fmt::{Formatter,Display};
-use crate::data_reader::{DataReaderStrategy, DataReaderError};
 use crate::data_reader::DataReaderError::DataNotRead;
+use crate::data_reader::{DataReaderError, DataReaderStrategy};
 use crate::TSize;
-
+use std::fmt;
+use std::fmt::{Display, Formatter};
 
 #[derive(Debug)]
 pub enum KmeansRunnerError {
@@ -16,21 +15,28 @@ pub enum KmeansRunnerError {
 impl Display for KmeansRunnerError {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self {
-            KmeansRunnerError::DataReader(e) =>  write!(f,"{}", e),
-            KmeansRunnerError::CentroidsNone => write!(f, "Got data reference, but not for centroids"),
-            KmeansRunnerError::DataNone=> write!(f, "Got centroids reference, but not for data"),
+            KmeansRunnerError::DataReader(e) => write!(f, "{}", e),
+            KmeansRunnerError::CentroidsNone => {
+                write!(f, "Got data reference, but not for centroids")
+            }
+            KmeansRunnerError::DataNone => write!(f, "Got centroids reference, but not for data"),
             KmeansRunnerError::Kmeans => write!(f, "The dataloader has not read the data"),
         }
     }
 }
 
-
-
 pub trait KmeansStrategy<T: TSize> {
-    fn run(&self, data: &[T], centroids: &[T], num_data_points: usize, num_dimensions: usize, num_centroids: usize, max_iter: usize) -> T;
-    fn step(&self, data: &[T], centroids: &[T]);
+    fn run(
+        &self,
+        data: &[T],
+        centroids: &[T],
+        num_data_points: usize,
+        num_dimensions: usize,
+        num_centroids: usize,
+        max_iter: usize,
+    ) -> Box<[usize]>;
+    fn step(&self, data: &[T], centroids: &[T], labels: &mut [usize], d: usize, k: usize);
 }
-
 
 pub struct KmeansRunner {
     num_data_points: usize,
@@ -44,24 +50,41 @@ pub struct KmeansRunner {
     }
 }*/
 
-
 impl KmeansRunner {
-    pub fn new(num_data_points: usize, num_dimension: usize, num_centroids: usize, max_iter: usize) -> Self {
-        Self {num_data_points, num_dimension, num_centroids, max_iter}
+    pub fn new(
+        num_data_points: usize,
+        num_dimension: usize,
+        num_centroids: usize,
+        max_iter: usize,
+    ) -> Self {
+        Self {
+            num_data_points,
+            num_dimension,
+            num_centroids,
+            max_iter,
+        }
     }
-    pub fn run<T: TSize>(&self,kmeans_strategy: &impl KmeansStrategy<T>, data_reader: &impl DataReaderStrategy<T>) -> Result<String,KmeansRunnerError> {
+    pub fn run<T: TSize>(
+        &self,
+        kmeans_strategy: &impl KmeansStrategy<T>,
+        data_reader: &impl DataReaderStrategy<T>,
+    ) -> Result<String, KmeansRunnerError> {
         match (data_reader.get_data_ref(), data_reader.get_centroid_ref()) {
             (Some(data), Some(centroids)) => {
-                kmeans_strategy.run(data, centroids, self.num_data_points, self.num_dimension, self.num_centroids, self.max_iter);
+                kmeans_strategy.run(
+                    data,
+                    centroids,
+                    self.num_data_points,
+                    self.num_dimension,
+                    self.num_centroids,
+                    self.max_iter,
+                );
                 Ok(String::from("DONE"))
-            },
+            }
             (None, Some(_)) => Err(KmeansRunnerError::DataNone),
             (Some(_), None) => Err(KmeansRunnerError::CentroidsNone),
             (None, None) => Err(KmeansRunnerError::DataReader(DataNotRead)),
         }
         //self.kmeans_strategy.update(self.data_reader.get_data_ref());
-
     }
 }
-
-
