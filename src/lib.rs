@@ -3,7 +3,7 @@ use std::iter::Sum;
 use cpython::{py_module_initializer, py_fn, PyNone, PyResult, Python, PyDict, PyTuple};
 use num::{Float, NumCast};
 
-use log::warn;
+//use log::warn;
 mod kmeans;
 mod marigold;
 mod lloyd;
@@ -39,7 +39,13 @@ fn run(py: Python, args: &PyTuple, kwargs: Option<&PyDict>) -> PyResult<PyNone> 
     let mut reader1 = NumpyReader::<f64>::new();
     reader1.read(DataType::NumpyData(vec![1.,2.,3.])).unwrap();
     let kmeans1 = marigold::MARIGOLDStrategy;
-    let mut run_result = kmeans::KmeansRunner::run(&kmeans1, &reader1)
+    let runner = kmeans::KmeansRunner::new(
+        3,
+        1,
+        2,
+        100
+    );
+    let mut run_result = runner.run(&kmeans1, &reader1)
         .expect("Could not run Kmeans");
     println!("{}", run_result);
 
@@ -47,7 +53,7 @@ fn run(py: Python, args: &PyTuple, kwargs: Option<&PyDict>) -> PyResult<PyNone> 
     let mut reader2 = NumpyReader::<f32>::new();
     //reader2.read(DataType::CSVData(String::from("/path"))).expect("DataReader failed to read data");
     reader2.read(DataType::NumpyData(vec![1., 2., 3.])).expect("DataReader failed to read data");
-    run_result = kmeans::KmeansRunner::run(&kmeans1, &reader2)
+    run_result = runner.run(&kmeans1, &reader2)
         .expect("Could not run Kmeans");
     println!("{}", run_result);
 
@@ -71,4 +77,12 @@ fn run(py: Python, args: &PyTuple, kwargs: Option<&PyDict>) -> PyResult<PyNone> 
 
     //Aaaand back to python
     Ok(PyNone)
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_test() {
+        assert!(true);
+    }
 }

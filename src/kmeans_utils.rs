@@ -13,3 +13,5 @@ pub fn squared_distance<T: TSize>(data1: &[T], data2: &[T]) -> T {
     data1.par_iter().zip(data2.par_iter()).map(|(&x, &y)| (x-y)*(x-y)).sum()
 }
 
+#[cfg(test)]
+mod tests;

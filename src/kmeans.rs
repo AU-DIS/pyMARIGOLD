@@ -8,6 +8,8 @@ use crate::TSize;
 #[derive(Debug)]
 pub enum KmeansRunnerError {
     DataReader(DataReaderError),
+    CentroidsNone,
+    DataNone,
     Kmeans,
 }
 
@@ -15,6 +17,8 @@ impl Display for KmeansRunnerError {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self {
             KmeansRunnerError::DataReader(e) =>  write!(f,"{}", e),
+            KmeansRunnerError::CentroidsNone => write!(f, "Got data reference, but not for centroids"),
+            KmeansRunnerError::DataNone=> write!(f, "Got centroids reference, but not for data"),
             KmeansRunnerError::Kmeans => write!(f, "The dataloader has not read the data"),
         }
     }
@@ -23,19 +27,41 @@ impl Display for KmeansRunnerError {
 
 
 pub trait KmeansStrategy<T: TSize> {
-    fn update(&self, data: &[T]);
+    fn run(&self, data: &[T], centroids: &[T], num_data_points: usize, num_dimensions: usize, num_centroids: usize, max_iter: usize) -> T;
+    fn step(&self, data: &[T], centroids: &[T]);
 }
 
 
-pub struct KmeansRunner {}
+pub struct KmeansRunner {
+    num_data_points: usize,
+    num_dimension: usize,
+    num_centroids: usize,
+    max_iter: usize,
+}
+/*impl Default for KmeansRunner {
+    fn default() -> Self {
+        Self { num_data_points: None, num_dimension: None, num_centroids: None, max_iter: 100}
+    }
+}*/
+
 
 impl KmeansRunner {
-    pub fn run<T: TSize>(kmeans_strategy: &impl KmeansStrategy<T>, data_reader: &impl DataReaderStrategy<T>) -> Result<String,KmeansRunnerError> {
-        if let Some(data) = data_reader.get_data_ref() {
-            kmeans_strategy.update(data);
-            Ok(String::from("DONE"))
-        } else {Err(KmeansRunnerError::DataReader(DataNotRead))}
+    pub fn new(num_data_points: usize, num_dimension: usize, num_centroids: usize, max_iter: usize) -> Self {
+        Self {num_data_points, num_dimension, num_centroids, max_iter}
+    }
+    pub fn run<T: TSize>(&self,kmeans_strategy: &impl KmeansStrategy<T>, data_reader: &impl DataReaderStrategy<T>) -> Result<String,KmeansRunnerError> {
+        match (data_reader.get_data_ref(), data_reader.get_centroid_ref()) {
+            (Some(data), Some(centroids)) => {
+                kmeans_strategy.run(data, centroids, self.num_data_points, self.num_dimension, self.num_centroids, self.max_iter);
+                Ok(String::from("DONE"))
+            },
+            (None, Some(_)) => Err(KmeansRunnerError::DataNone),
+            (Some(_), None) => Err(KmeansRunnerError::CentroidsNone),
+            (None, None) => Err(KmeansRunnerError::DataReader(DataNotRead)),
+        }
         //self.kmeans_strategy.update(self.data_reader.get_data_ref());
 
     }
 }
+
+
