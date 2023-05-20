@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::kmeans_utils::{euclidian_distance, squared_distance};
+    use crate::kmeans_utils::{euclidian_distance, squared_distance, recalculate};
     #[test]
     fn squared_distance_zero() {
         assert_eq!(
@@ -69,5 +69,9 @@ mod tests {
             euclidian_distance::<f32>(&[1., 2., 3., 4.], &[2., 2., 2., 2.]),
             f32::sqrt(6.)
         );
+    }
+
+    fn recalculate_updates_centroids {
+
     }
 }

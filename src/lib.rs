@@ -36,9 +36,9 @@ fn run(py: Python, args: &PyTuple, kwargs: Option<&PyDict>) -> PyResult<PyNone> 
     //And now we actually do something with it
     //let runner1 = kmeans::KmeansRunner::run(); // ::new(crate::marigold::MARIGOLDStrategy, crate::data_reader::CSVReader::new());
     let mut reader1 = NumpyReader::<f64>::new();
-    reader1.read(DataType::NumpyData(vec![1., 2., 3.])).unwrap();
-    let kmeans1 = marigold::MARIGOLDStrategy;
-    let runner = kmeans::KmeansRunner::new(3, 1, 2, 100);
+    reader1.read(DataType::NumpyData(vec![1., 2., 3., 4.])).unwrap();
+    let kmeans1 = lloyd::LloydStrategy;
+    let runner = kmeans::KmeansRunner::new(2, 2, 2, 100);
     let mut run_result = runner
         .run(&kmeans1, &reader1)
         .expect("Could not run Kmeans");
@@ -47,7 +47,7 @@ fn run(py: Python, args: &PyTuple, kwargs: Option<&PyDict>) -> PyResult<PyNone> 
     let mut reader2 = NumpyReader::<f32>::new();
     //reader2.read(DataType::CSVData(String::from("/path"))).expect("DataReader failed to read data");
     reader2
-        .read(DataType::NumpyData(vec![1., 2., 3.]))
+        .read(DataType::NumpyData(vec![1., 2., 3., 4.]))
         .expect("DataReader failed to read data");
     run_result = runner
         .run(&kmeans1, &reader2)

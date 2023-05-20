@@ -28,8 +28,10 @@ pub fn recalculate<T: TSize>(
 ) -> bool {
     let old_centroids = &mut vec![num::cast(0.).unwrap(); k * d];
     let mut count = vec![0 as usize; k];
+    println!("{:?}",centroids);
     centroids.clone_into(old_centroids);
     centroids.fill(num::cast(0.).unwrap());
+    println!("{:?}",centroids);
 
     //Count and dist sum
     let mut mutex_cent_count: Vec<Mutex<(&mut [T], &mut usize)>> = centroids
@@ -48,19 +50,26 @@ pub fn recalculate<T: TSize>(
                 .for_each(|(p, c_sum)| *c_sum = *p + *c_sum);
             *tup.1 += 1;
         });
-
+    //println!("{:?}",centroids);
     //Divide dist sum by count
     mutex_cent_count.par_iter().for_each(|mutex| {
         let mut tup = mutex.lock().unwrap();
-        let cnt = tup.1.clone();
-        //let c_sum = tup.0;
-        tup.0
-            .into_par_iter()
-            .for_each(|c_sum_val| *c_sum_val = *c_sum_val / num::cast(cnt).unwrap())
+        let cnt = tup.1.clone(); //We clone a single value once per centroid to satisfy borrow rules.
+        if cnt != 0 {
+            tup.0
+                .into_par_iter()
+                .for_each(|c_sum_val| *c_sum_val = *c_sum_val / num::cast(cnt).unwrap())
+        } else {
+           //TODO: Deal with empty clusters. Currently they are set to zero.
+            //TODO: I could chunk and zip old_centroids into this. May be the easiest.
+        }
+
     });
 
     //Did this update centroids? Find out in the next episode of Rust is pain
-
+    println!("{:?}",centroids);
+    println!("{:?}", old_centroids);
+    println!("NEXT");
     //Calculate change in centroids
     let converged = true;
 

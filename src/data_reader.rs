@@ -117,7 +117,7 @@ impl<T> DataReaderStrategy<T> for NumpyReader<T> {
                 println!("Reading as array {:?}", data_array);
                 self.data = Some(data_array);
                 self.centroids = Some(
-                    vec![2., 2., 2., 2.]
+                    vec![0., 0., 1., 1.]
                         .iter()
                         .map(|&v| num::cast(v).unwrap())
                         .collect(),
