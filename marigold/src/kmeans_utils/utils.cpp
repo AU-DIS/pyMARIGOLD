@@ -117,7 +117,8 @@ bool Recalculate(const double data[], double centroids[], double old_centroids[]
         for (int j = 0; j < d; j++) {
             centroids[labels[i]*d+j] += data[i*d+j];
             //Calculate inertia to old centers, as we only need it at convergence, where old = new.
-            //As a result is is wrong for every other round, but we skip a full data loop by calculating it here every round.
+            //As a result it is wrong for every other round, but we skip a full data loop by calculating it here every round.
+            //It is also wrong if we hit max_iter
             *inertia += (data[i*d+j]-old_centroids[labels[i]*d+j])*(data[i*d+j]-old_centroids[labels[i]*d+j]);
         }
     }

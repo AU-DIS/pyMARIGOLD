@@ -2,6 +2,7 @@ use cpython::{py_fn, py_module_initializer, PyDict, PyNone, PyResult, PyTuple, P
 use num::{Float, NumCast};
 use std::fmt::Debug;
 use std::iter::Sum;
+use std::ops::AddAssign;
 
 //use log::warn;
 mod data_reader;
@@ -17,7 +18,7 @@ py_module_initializer!(pyMARIGOLD, |py, m| {
     Ok(())
 });
 //type TSize = f64;
-pub trait TSize: Float + Debug + Sum + NumCast + Sync + Send {}
+pub trait TSize: Float + Debug + Sum + AddAssign + NumCast + Sync + Send + Copy + Sized {}
 
 impl TSize for f64 {}
 impl TSize for f32 {}

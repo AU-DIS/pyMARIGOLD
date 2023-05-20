@@ -23,7 +23,8 @@ impl<T: TSize> KmeansStrategy<T> for LloydStrategy {
         let mut converged: bool = false;
 
         while iter < max_iter && !converged {
-            self.step(data, centroids, &mut labels, d, k); //Step (Calculate distance + update + recalculate)
+            self.step(data, centroids, &mut labels, d, k); //Step (Calculate distance + update)
+                                                           //Recalculate TODO
             iter += 1;
         }
 
@@ -31,29 +32,23 @@ impl<T: TSize> KmeansStrategy<T> for LloydStrategy {
     }
     fn step(&self, data: &[T], centroids: &[T], mut labels: &mut [usize], d: usize, k: usize) {
         //TODO: Help. It hurts.
-        data.par_chunks(d)
+        //For all datapoints
+        data.par_chunks(d) //TODO: The Data is always viewed in chunks, so I can use this as the "data" param.
             .zip(labels.par_iter_mut())
             .for_each(|(point, label)| {
-                let mut distances: Vec<T> = vec![num::cast(0.).unwrap(); k];
+                //For all centroids
+                let mut distances: Vec<T> = vec![num::cast(0.).unwrap(); k]; //TODO: Surely I can move this out.
                 centroids
                     .par_chunks(d)
                     .zip(distances.par_iter_mut())
                     .for_each(|(centroid, dist)| *dist = squared_distance(point, centroid));
+
+                //Update label
                 distances.iter().enumerate().for_each(|(j, dist)| {
                     if *dist < distances[*label] {
                         *label = j
                     }
                 });
             });
-
-        /*data.par_chunks(d).enumerate().for_each(|(i, point)| {
-            let mut distances: Vec<T> = vec![num::cast(0.).unwrap();k];
-            centroids.par_chunks(d).enumerate()
-                .for_each(|(j,centroid)| distances[j] = squared_distance(point, centroid));
-            let distances = distances;
-            //let mut labels = labels;
-            distances.par_iter().enumerate().for_each(|(j, dist)| if *dist < distances[labels[j]] {labels[i]=j});
-
-        });*/
     }
 }
