@@ -33,7 +33,7 @@ impl Display for DataReaderError {
 
 pub enum DataType<T> {
     CSVData(String),
-    NumpyData(Vec<T>),
+    NumpyData(Vec<T>, usize, usize),
 }
 
 pub struct CSVReader<T> {
@@ -65,9 +65,11 @@ impl<T> NumpyReader<T> {
 pub trait DataReaderStrategy<T> {
     fn read(&mut self, data: DataType<T>) -> Result<(), DataReaderError>
     where
-        T: NumCast + Debug;
+        T: NumCast + Debug + Clone;
     fn get_data_ref(&self) -> &Option<Vec<T>>;
     fn get_centroid_ref(&self) -> &Option<Vec<T>>;
+    fn get_centroid_ref_mut(&mut self) -> &mut Option<Vec<T>>;
+    fn set_centroids(&mut self, c: Option<Vec<T>>);
 }
 
 impl<T> DataReaderStrategy<T> for CSVReader<T> {
@@ -103,25 +105,36 @@ impl<T> DataReaderStrategy<T> for CSVReader<T> {
         &self.data
     }
     fn get_centroid_ref(&self) -> &Option<Vec<T>> {
-        &self.centroids
+        & self.centroids
+    }
+
+    fn get_centroid_ref_mut(&mut self) -> &mut Option<Vec<T>> {
+        &mut self.centroids
+    }
+    fn set_centroids(&mut self, c: Option<Vec<T>>) {
+        self.centroids = c;
     }
 }
 
 impl<T> DataReaderStrategy<T> for NumpyReader<T> {
     fn read(&mut self, data: DataType<T>) -> Result<(), DataReaderError>
     where
-        T: Debug + NumCast,
+        T: Debug + NumCast + Clone,
     {
         match data {
-            DataType::NumpyData(data_array) => {
+            DataType::NumpyData(data_array, num_of_dimensions,num_of_centroids) => {
                 println!("Reading as array {:?}", data_array);
+
+                //TODO: Currently takes the first k points as start centroids
+                self.centroids = Some(data_array[0..num_of_dimensions * num_of_centroids].to_owned()
+                                      /*vec![-1., -1., 1., 1.]
+                                          .iter()
+                                          .map(|&v| num::cast(v).unwrap())
+                                          .collect(),*/
+                );
                 self.data = Some(data_array);
-                self.centroids = Some(
-                    vec![0., 0., 1., 1.]
-                        .iter()
-                        .map(|&v| num::cast(v).unwrap())
-                        .collect(),
-                ); //TODO: Placeholder
+
+
                 Ok(())
             }
             _ => {
@@ -137,5 +150,11 @@ impl<T> DataReaderStrategy<T> for NumpyReader<T> {
     }
     fn get_centroid_ref(&self) -> &Option<Vec<T>> {
         &self.centroids
+    }
+    fn get_centroid_ref_mut(&mut self) -> &mut Option<Vec<T>> {
+        &mut self.centroids
+    }
+    fn set_centroids(&mut self, c: Option<Vec<T>>) {
+        self.centroids = c;
     }
 }

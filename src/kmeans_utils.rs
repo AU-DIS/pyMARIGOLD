@@ -52,28 +52,28 @@ pub fn recalculate<T: TSize>(
         });
     //println!("{:?}",centroids);
     //Divide dist sum by count
-    mutex_cent_count.par_iter().for_each(|mutex| {
+    mutex_cent_count.par_iter().zip(old_centroids.par_chunks(d)).for_each(|(mutex,old)| {
         let mut tup = mutex.lock().unwrap();
         let cnt = tup.1.clone(); //We clone a single value once per centroid to satisfy borrow rules.
         if cnt != 0 {
             tup.0
                 .into_par_iter()
-                .for_each(|c_sum_val| *c_sum_val = *c_sum_val / num::cast(cnt).unwrap())
+                .for_each(|c_sum_val| *c_sum_val = *c_sum_val / num::cast(cnt).unwrap());
         } else {
-           //TODO: Deal with empty clusters. Currently they are set to zero.
-            //TODO: I could chunk and zip old_centroids into this. May be the easiest.
+            //If cluster is empty, set to old cluster
+            tup.0.into_par_iter().zip(old.into_par_iter()).for_each(|(empty_val, old_val)| *empty_val = *old_val);
         }
-
     });
 
     //Did this update centroids? Find out in the next episode of Rust is pain
     println!("{:?}",centroids);
     println!("{:?}", old_centroids);
     println!("NEXT");
-    //Calculate change in centroids
-    let converged = true;
 
-    converged
+    //Calculate change in centroids //TODO: Need a version that saves div for marigold. I may be able to do that with a replaceable function in any()
+    //returns bool
+    !centroids.par_chunks(d).zip(old_centroids.par_chunks(d)).any(|(new, old)| euclidian_distance(new, old)> num::cast(0.).unwrap())
+
 }
 
 #[cfg(test)]

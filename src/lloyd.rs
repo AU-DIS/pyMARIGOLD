@@ -12,7 +12,7 @@ impl<T: TSize> KmeansStrategy<T> for LloydStrategy {
     fn run(
         &self,
         data: &[T],
-        centroids:  &[T],
+        centroids: &mut Vec<T>,
         n: usize,
         d: usize,
         k: usize,
@@ -24,13 +24,17 @@ impl<T: TSize> KmeansStrategy<T> for LloydStrategy {
 
         while iter < max_iter && !converged {
             self.step(data, centroids, &mut labels, d, k); //Step (Calculate distance + update)
-            recalculate(data, &mut centroids.to_vec(), &*labels, d, k);//Recalculate TODO: to_vec is no no
+            converged = recalculate(data, centroids, &*labels, d, k);//Recalculate TODO: to_vec is no no
+
+            if converged {
+                break;
+            }
             iter += 1;
         }
 
         Box::from(labels)
     }
-    fn step(&self, data: &[T], centroids: &[T], mut labels: &mut [usize], d: usize, k: usize) {
+    fn step(&self, data: &[T], centroids: &mut Vec<T>, mut labels: &mut [usize], d: usize, k: usize) {
         //TODO: Help. It hurts.
         //For all datapoints
         data.par_chunks(d) //TODO: The Data is always viewed in chunks, so I can use this as the "data" param.

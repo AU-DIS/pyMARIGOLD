@@ -29,13 +29,13 @@ pub trait KmeansStrategy<T: TSize> {
     fn run(
         &self,
         data: &[T],
-        centroids: &[T],
+        centroids: &mut Vec<T>,
         num_data_points: usize,
         num_dimensions: usize,
         num_centroids: usize,
         max_iter: usize,
     ) -> Box<[usize]>;
-    fn step(&self, data: &[T], centroids: &[T], labels: &mut [usize], d: usize, k: usize);
+    fn step(&self, data: &[T], centroids: &mut Vec<T>, labels: &mut [usize], d: usize, k: usize);
 }
 
 pub struct KmeansRunner {
@@ -66,12 +66,13 @@ impl KmeansRunner {
     }
     pub fn run<T: TSize>(
         &self,
-        kmeans_strategy: &impl KmeansStrategy<T>,
-        data_reader: &impl DataReaderStrategy<T>,
-    ) -> Result<String, KmeansRunnerError> {
-        match (data_reader.get_data_ref(), data_reader.get_centroid_ref()) {
+        kmeans_strategy: & impl KmeansStrategy<T>,
+        data_reader: &mut impl DataReaderStrategy<T>,
+    ) -> Result<Box<[usize]>, KmeansRunnerError> {
+        let mut c = std::mem::take(data_reader.get_centroid_ref_mut());//TODO: Is this insane or actually how it should be done?
+        match (data_reader.get_data_ref(), &mut c) {
             (Some(data), Some(centroids)) => {
-                kmeans_strategy.run(
+                let labels = kmeans_strategy.run(
                     data,
                     centroids,
                     self.num_data_points,
@@ -79,7 +80,8 @@ impl KmeansRunner {
                     self.num_centroids,
                     self.max_iter,
                 );
-                Ok(String::from("DONE"))
+                data_reader.set_centroids(c); //TODO: Is this insane or actually how it should be done?
+                Ok(labels)
             }
             (None, Some(_)) => Err(KmeansRunnerError::DataNone),
             (Some(_), None) => Err(KmeansRunnerError::CentroidsNone),
