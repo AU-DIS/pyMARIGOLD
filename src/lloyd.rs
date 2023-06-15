@@ -2,7 +2,7 @@ use rayon::prelude::*;
 pub struct LloydStrategy;
 
 use crate::kmeans::KmeansStrategy;
-use crate::kmeans_utils::{squared_distance, recalculate};
+use crate::kmeans_utils::{recalculate, squared_distance};
 use cpython::py_class::slots::type_error_to_false;
 use num::NumCast;
 //use crate::lloyd::ConvergeState::Converged;
@@ -24,7 +24,7 @@ impl<T: TSize> KmeansStrategy<T> for LloydStrategy {
 
         while iter < max_iter && !converged {
             self.step(data, centroids, &mut labels, d, k); //Step (Calculate distance + update)
-            converged = recalculate(data, centroids, &*labels, d, k);//Recalculate TODO: to_vec is no no
+            converged = recalculate(data, centroids, &*labels, d, k); //Recalculate TODO: to_vec is no no
 
             if converged {
                 break;
@@ -34,7 +34,14 @@ impl<T: TSize> KmeansStrategy<T> for LloydStrategy {
 
         Box::from(labels)
     }
-    fn step(&self, data: &[T], centroids: &mut Vec<T>, mut labels: &mut [usize], d: usize, k: usize) {
+    fn step(
+        &self,
+        data: &[T],
+        centroids: &mut Vec<T>,
+        mut labels: &mut [usize],
+        d: usize,
+        k: usize,
+    ) {
         //TODO: Help. It hurts.
         //For all datapoints
         data.par_chunks(d) //TODO: The Data is always viewed in chunks, so I can use this as the "data" param.

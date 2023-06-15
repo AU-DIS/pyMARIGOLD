@@ -24,7 +24,14 @@ impl<T: TSize> KmeansStrategy<T> for MARIGOLDStrategy {
         println!("Here is a value from far away {:?}", p);
         Box::from(labels)*/
     }
-    fn step(&self, data: &[T], centroids: &mut Vec<T>, mut labels: &mut [usize], d: usize, k: usize) {
+    fn step(
+        &self,
+        data: &[T],
+        centroids: &mut Vec<T>,
+        mut labels: &mut [usize],
+        d: usize,
+        k: usize,
+    ) {
         todo!()
     }
 }

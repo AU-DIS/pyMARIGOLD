@@ -105,7 +105,7 @@ impl<T> DataReaderStrategy<T> for CSVReader<T> {
         &self.data
     }
     fn get_centroid_ref(&self) -> &Option<Vec<T>> {
-        & self.centroids
+        &self.centroids
     }
 
     fn get_centroid_ref_mut(&mut self) -> &mut Option<Vec<T>> {
@@ -122,18 +122,17 @@ impl<T> DataReaderStrategy<T> for NumpyReader<T> {
         T: Debug + NumCast + Clone,
     {
         match data {
-            DataType::NumpyData(data_array, num_of_dimensions,num_of_centroids) => {
+            DataType::NumpyData(data_array, num_of_dimensions, num_of_centroids) => {
                 println!("Reading as array {:?}", data_array);
 
                 //TODO: Currently takes the first k points as start centroids
-                self.centroids = Some(data_array[0..num_of_dimensions * num_of_centroids].to_owned()
-                                      /*vec![-1., -1., 1., 1.]
-                                          .iter()
-                                          .map(|&v| num::cast(v).unwrap())
-                                          .collect(),*/
+                self.centroids = Some(
+                    data_array[0..num_of_dimensions * num_of_centroids].to_owned(), /*vec![-1., -1., 1., 1.]
+                                                                                    .iter()
+                                                                                    .map(|&v| num::cast(v).unwrap())
+                                                                                    .collect(),*/
                 );
                 self.data = Some(data_array);
-
 
                 Ok(())
             }

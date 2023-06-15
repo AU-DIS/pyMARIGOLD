@@ -18,7 +18,10 @@ py_module_initializer!(pyMARIGOLD, |py, m| {
     Ok(())
 });
 //type TSize = f64;
-pub trait TSize: Float + Debug + Sum + AddAssign + NumCast + Sync + Send + Copy + Clone + Sized {}
+pub trait TSize:
+    Float + Debug + Sum + AddAssign + NumCast + Sync + Send + Copy + Clone + Sized
+{
+}
 
 impl TSize for f64 {}
 impl TSize for f32 {}
@@ -36,12 +39,16 @@ fn run(py: Python, args: &PyTuple, kwargs: Option<&PyDict>) -> PyResult<PyNone> 
     //And now we actually do something with it
     //let runner1 = kmeans::KmeansRunner::run(); // ::new(crate::marigold::MARIGOLDStrategy, crate::data_reader::CSVReader::new());
     let mut reader1 = NumpyReader::<f64>::new();
-    reader1.read(DataType::NumpyData(vec![1., 1., 1., 1.,
-                                               2., 2., 2., 2.,
-                                               3., 3., 3., 3.,
-                                               4., 4., 4., 4.,
-                                               5., 5., 5., 5.,
-                                               6., 6., 6., 6.],4, 2)).unwrap();
+    reader1
+        .read(DataType::NumpyData(
+            vec![
+                1., 1., 1., 1., 2., 2., 2., 2., 3., 3., 3., 3., 4., 4., 4., 4., 5., 5., 5., 5., 6.,
+                6., 6., 6.,
+            ],
+            4,
+            2,
+        ))
+        .unwrap();
     let kmeans1 = lloyd::LloydStrategy;
     let runner = kmeans::KmeansRunner::new(6, 4, 2, 100);
     let mut run_result = runner
@@ -52,12 +59,15 @@ fn run(py: Python, args: &PyTuple, kwargs: Option<&PyDict>) -> PyResult<PyNone> 
     let mut reader2 = NumpyReader::<f32>::new();
     //reader2.read(DataType::CSVData(String::from("/path"))).expect("DataReader failed to read data");
     reader2
-        .read(DataType::NumpyData(vec![1., 1., 1., 1.,
-                                       2., 2., 2., 2.,
-                                       3., 3., 3., 3.,
-                                       4., 4., 4., 4.,
-                                       5., 5., 5., 5.,
-                                       6., 6., 6., 6.],4, 2)).expect("DataReader failed to read data");
+        .read(DataType::NumpyData(
+            vec![
+                1., 1., 1., 1., 2., 2., 2., 2., 3., 3., 3., 3., 4., 4., 4., 4., 5., 5., 5., 5., 6.,
+                6., 6., 6.,
+            ],
+            4,
+            2,
+        ))
+        .expect("DataReader failed to read data");
     run_result = runner
         .run(&kmeans1, &mut reader2)
         .expect("Could not run Kmeans");

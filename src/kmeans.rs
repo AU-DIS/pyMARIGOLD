@@ -66,10 +66,10 @@ impl KmeansRunner {
     }
     pub fn run<T: TSize>(
         &self,
-        kmeans_strategy: & impl KmeansStrategy<T>,
+        kmeans_strategy: &impl KmeansStrategy<T>,
         data_reader: &mut impl DataReaderStrategy<T>,
     ) -> Result<Box<[usize]>, KmeansRunnerError> {
-        let mut c = std::mem::take(data_reader.get_centroid_ref_mut());//TODO: Is this insane or actually how it should be done?
+        let mut c = std::mem::take(data_reader.get_centroid_ref_mut()); //TODO: Is this insane or actually how it should be done?
         match (data_reader.get_data_ref(), &mut c) {
             (Some(data), Some(centroids)) => {
                 let labels = kmeans_strategy.run(
