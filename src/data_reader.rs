@@ -80,7 +80,7 @@ impl<T> DataReaderStrategy<T> for CSVReader<T> {
         match data {
             DataType::CSVData(path) => {
                 //TODO: All of this is Placeholder for actually loading a file
-                println!("Reading as CSV: {}", path);
+                //println!("Reading as CSV: {}", path);
                 let mut d: Vec<T> = Vec::new();
                 for val in vec![1.0, 1.0, 1.0, 1.0].iter() {
                     d.push(num::cast(*val).unwrap())
@@ -123,7 +123,7 @@ impl<T> DataReaderStrategy<T> for NumpyReader<T> {
     {
         match data {
             DataType::NumpyData(data_array, num_of_dimensions, num_of_centroids) => {
-                println!("Reading as array {:?}", data_array);
+                //println!("Reading as array {:?}", data_array);
 
                 //TODO: Currently takes the first k points as start centroids
                 self.centroids = Some(

@@ -1,3 +1,5 @@
+use std::sync::Mutex;
+use std::time::SystemTime;
 use rayon::prelude::*;
 pub struct LloydStrategy;
 
@@ -23,15 +25,19 @@ impl<T: TSize> KmeansStrategy<T> for LloydStrategy {
         let mut converged: bool = false;
 
         while iter < max_iter && !converged {
+           // let now = SystemTime::now();
             self.step(data, centroids, &mut labels, d, k); //Step (Calculate distance + update)
+            //println!("Step (millis): {:?}",now.elapsed().unwrap().as_millis());
+            //println!("Labels: {:?}", labels);
+            //let now2 = SystemTime::now();
             converged = recalculate(data, centroids, &*labels, d, k); //Recalculate TODO: to_vec is no no
-
-            if converged {
+            //println!("Recalculate (millis): {:?}",now2.elapsed().unwrap().as_millis());
+            /*if converged {
                 break;
-            }
+            }*/
             iter += 1;
         }
-
+        println!("{:?}",iter);
         Box::from(labels)
     }
     fn step(

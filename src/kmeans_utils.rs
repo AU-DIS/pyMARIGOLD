@@ -28,12 +28,13 @@ pub fn recalculate<T: TSize>(
 ) -> bool {
     let old_centroids = &mut vec![num::cast(0.).unwrap(); k * d];
     let mut count = vec![0 as usize; k];
-    println!("{:?}", centroids);
+    //println!("{:?}", centroids);
     centroids.clone_into(old_centroids);
     centroids.fill(num::cast(0.).unwrap());
-    println!("{:?}", centroids);
+    //println!("{:?}", centroids);
 
     //Count and dist sum
+    //TODO: Invert this to not thread chunks but points instead. There are more points after all
     let mut mutex_cent_count: Vec<Mutex<(&mut [T], &mut usize)>> = centroids
         .chunks_mut(d)
         .zip(count.iter_mut())
@@ -52,9 +53,10 @@ pub fn recalculate<T: TSize>(
         });
     //println!("{:?}",centroids);
     //Divide dist sum by count
+    //TODO: You can also thread centroid chunks here, but I think that will actually be slower, since rayon will be nested
     mutex_cent_count
-        .par_iter()
-        .zip(old_centroids.par_chunks(d))
+        .iter()
+        .zip(old_centroids.chunks(d))
         .for_each(|(mutex, old)| {
             let mut tup = mutex.lock().unwrap();
             let cnt = tup.1.clone(); //We clone a single value once per centroid to satisfy borrow rules.
@@ -72,16 +74,16 @@ pub fn recalculate<T: TSize>(
         });
 
     //Did this update centroids? Find out in the next episode of Rust is pain
-    println!("{:?}", centroids);
-    println!("{:?}", old_centroids);
-    println!("NEXT");
+    //println!("{:?}", centroids);
+    //println!("{:?}", old_centroids);
+    //println!("NEXT");
 
     //Calculate change in centroids //TODO: Need a version that saves div for marigold. I may be able to do that with a replaceable function in any()
     //returns bool
     !centroids
-        .par_chunks(d)
-        .zip(old_centroids.par_chunks(d))
-        .any(|(new, old)| euclidian_distance(new, old) > num::cast(0.).unwrap())
+        .chunks(d)
+        .zip(old_centroids.chunks(d))
+        .any(|(new, old)| euclidian_distance(new, old) > num::cast(0.00001).unwrap())
 }
 
 #[cfg(test)]

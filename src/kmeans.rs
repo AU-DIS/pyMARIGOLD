@@ -3,6 +3,7 @@ use crate::data_reader::{DataReaderError, DataReaderStrategy};
 use crate::TSize;
 use std::fmt;
 use std::fmt::{Display, Formatter};
+use std::time::SystemTime;
 
 #[derive(Debug)]
 pub enum KmeansRunnerError {
@@ -72,6 +73,7 @@ impl KmeansRunner {
         let mut c = std::mem::take(data_reader.get_centroid_ref_mut()); //TODO: Is this insane or actually how it should be done?
         match (data_reader.get_data_ref(), &mut c) {
             (Some(data), Some(centroids)) => {
+                let now = SystemTime::now();
                 let labels = kmeans_strategy.run(
                     data,
                     centroids,
@@ -80,6 +82,7 @@ impl KmeansRunner {
                     self.num_centroids,
                     self.max_iter,
                 );
+                println!("kmeans run (millis): {:?}",now.elapsed().unwrap().as_millis());
                 data_reader.set_centroids(c); //TODO: Is this insane or actually how it should be done?
                 Ok(labels)
             }

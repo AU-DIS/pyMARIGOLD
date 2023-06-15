@@ -70,8 +70,43 @@ mod tests {
             f32::sqrt(6.)
         );
     }
+    #[test]
+    fn recalculate_mutates_centroids() {
+        let data = vec![2.,2.,5.,5.,8.,8.];
+        let mut centroids = vec![1., 1., 10., 10.];
+        let mut labels = [0,0,0];
+        recalculate(&data, &mut centroids, &mut labels, 2, 2);
+        println!("{:?}",centroids);
+        println!("{:?}",labels);
+        assert_ne!(centroids, vec![1., 1., 10., 10.]);
+    }
+    #[test]
+    fn recalculate_only_changes_clusters_with_points() {
+        let data = vec![2.,2.,5.,5.,8.,8.];
+        let mut centroids = vec![1., 1., 10., 10.];
+        let mut labels = [0,0,0];
+        recalculate(&data, &mut centroids, &mut labels, 2, 2);
 
-    /*fn recalculate_updates_centroids {
+        assert_ne!(centroids, vec![3.5, 3.5, 10., 10.]);
+    }
 
-    }*/
+    #[test]
+    fn recalculate_does_not_mutate_labels() {
+        let data = vec![2.,2.,5.,5.,8.,8.];
+        let mut centroids = vec![1., 1., 10., 10.];
+        let mut labels = [0,0,0];
+        recalculate(&data, &mut centroids, &mut labels, 2, 2);
+
+        assert_eq!(labels, [0,0,0]);
+    }
+    #[test]
+    fn recalculate_does_not_mutate_data() {
+        let data = vec![2.,2.,5.,5.,8.,8.];
+        let mut centroids = vec![1., 1., 10., 10.];
+        let mut labels = [0,0,0];
+        recalculate(&data, &mut centroids, &mut labels, 2, 2);
+
+        assert_eq!(data, vec![2., 2., 5., 5., 8.,8.]);
+    }
+
 }
