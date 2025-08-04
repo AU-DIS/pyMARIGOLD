@@ -39,6 +39,8 @@ result = mg.marigold(X=dataset, n_clusters=2, n_init=10)
 print(result)
 ```
 
+Note that this version does not include the DCT pre-transformation of data. Hence faster results may be achieved if pre-processing is feasible. 
+
 
 ## Modify
 The wrapper is dependent on the pre-compiled .so, .dll files.
