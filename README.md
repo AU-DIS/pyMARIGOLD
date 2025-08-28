@@ -1,5 +1,5 @@
 # pyMARIGOLD
-A python package for MARIGOLD kmeans clustering
+A python package for [MARIGOLD kmeans clustering](https://www.vldb.org/pvldb/vol16/p1740-karras.pdf). 
 
 ## Installation
 The latest version can be installed directly with:
@@ -40,20 +40,20 @@ print(result)
 ```
 
 ## Data Transformation pre-step
-Note that this version does not include the DCT pre-transformation of data. Hence faster results may be achieved if pre-processing is feasible. The following results show how to DCT transform data in python:
+Note that this version does not include the DCT pre-transformation of data. Hence faster results may be achieved if pre-processing is feasible. The following example shows how to use DCT to transform data in python:
 ```python
 from scipy.fftpack import dct
 from keras.datasets import mnist
 import matplotlib.pyplot as plt
 
-# Obtain some data
+# Obtain some data (2D mnist images)
 (digits, labels), (digits_test,labels_test) = mnist.load_data()
 
 plt.gray()
 plt.matshow(digits[303])
 plt.show()
 
-# Transform in both dimension for best results
+# Transform in both dimension for best results (Compress information to pixel (0,0))
 dct_digit1 = dct(digits[302], norm='ortho')
 dct_digit1 = dct(dct_digit1, norm='ortho', axis=0)
 
@@ -75,9 +75,11 @@ print(dct_dist)
 > [!NOTE]
 > * You do not have to run the transformation every time you run Marigold. Simply save your transformed data once, and use it for all future K-means runs.
 > * Marigold works without the the data transformation, and is still likely to perform well by relying on Elkan pruning.
+> * DCT can be replaced with any other transformation or compression, if applicable for the data. As long as euclidian distances are preserved, the results will be the exact same as Lloyd.   
   
 ## Multithreading
 Currently this package does not support multithreading, hence scipy may be faster if multiple cores are available. This section will be updated if support is added.  
+
 
 ## Modify
 The wrapper is dependent on the pre-compiled .so, .dll files.
