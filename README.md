@@ -44,30 +44,35 @@ Note that this version does not include the DCT pre-transformation of data. Henc
 ```python
 from scipy.fftpack import dct
 from keras.datasets import mnist
+from sklearn.metrics.pairwise import euclidean_distances
 import matplotlib.pyplot as plt
 
 # Obtain some data (2D mnist images)
 (digits, labels), (digits_test,labels_test) = mnist.load_data()
 
-plt.gray()
-plt.matshow(digits[303])
-plt.show()
-
 # Transform in both dimension for best results (Compress information to pixel (0,0))
-dct_digit1 = dct(digits[302], norm='ortho')
+dct_digit1 = dct(digits[302], norm='ortho') # use norm='ortho' to preserve distances
 dct_digit1 = dct(dct_digit1, norm='ortho', axis=0)
 
+# Plot an untransformed digit
 plt.gray()
-plt.matshow(dct_digit2.reshape((28,28)))
+plt.matshow(digits[303])
 plt.show()
 
 # Transformation does not change the clustering. Euclidian distances stay the same.
 dct_digit2 = dct(digits[303], norm='ortho')
 dct_digit2 = dct(dct_digit2, norm='ortho', axis=0)
 
+# Plot the digit again but 2D DCT transformed
+plt.gray()
+plt.matshow(dct_digit2.reshape((28,28)))
+plt.show()
+
+#Calculate distance between non-transformed and transformed digits.
 real_dist = euclidean_distances(digits[302].flatten().reshape(1,-1), digits[303].flatten().reshape(1,-1))
 dct_dist = euclidean_distances(dct_digit1.flatten().reshape(1,-1), dct_digit2.flatten().reshape(1,-1))
 
+#Print to see the distance is the same
 print(real_dist)
 print(dct_dist)
 ```
@@ -77,9 +82,19 @@ print(dct_dist)
 > * Marigold works without the the data transformation, and is still likely to perform well by relying on Elkan pruning.
 > * DCT can be replaced with any other transformation or compression, if applicable for the data. As long as euclidian distances are preserved, the results will be the exact same as Lloyd.   
   
+## Empty clusters
+An edgecase that can often fool you when comparing k-means methods are the presense of empty clusters. It is rare for method implementation to note how they handle such cases, hence you can easily make a wrong comparison of methods if you have not ensured they handle empty clusters in the same manner. This is a very common pitfall, so be careful.  
+
+Some common ways to handle empty clusters are:
+* Do nothing. Leave the centroid were it is, and the cluster empty.
+* Move the centroid to origin of space.
+* Assign a random datapoint to the cluster.
+
+Obviously, if the handling differes in the implementations you are comparing, you will likely obtain different results.
+This implementation of MARIGOLD use the "do nothing" appraoch. 
+
 ## Multithreading
 Currently this package does not support multithreading, hence scipy may be faster if multiple cores are available. This section will be updated if support is added.  
-
 
 ## Modify
 The wrapper is dependent on the pre-compiled .so, .dll files.
